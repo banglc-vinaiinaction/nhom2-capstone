@@ -1,0 +1,26 @@
+# Environments & Caches
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# Training artifacts & Weights
+runs/
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Working & scratch directories
+work/
+
+# Compressed archives
+*.zip
+*.tar.gz
+*.tar
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

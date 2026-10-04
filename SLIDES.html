@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>SLIDE BÁO CÁO GIẢI PHÁP: GREENSM DATA-CENTRIC CHALLENGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet">
+<style>
+:root { font-family: "Inter", "Segoe UI", "Noto Sans", sans-serif; color: #effaf6; background: #081815; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-weight: 450; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    button { font: inherit; }
+    .deck { min-height: 100svh; overflow-x: hidden; background: radial-gradient(circle at 85% 5%, #164d40 0, transparent 40%), #081815; }
+    .topbar { position: fixed; z-index: 3; inset: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem clamp(1rem, 4vw, 4rem); background: #081815ee; border-bottom: 1px solid #ffffff21; }
+    .brand { color: #76e1ba; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; }
+    .meta { color: #b5cec3; font-size: .8rem; text-align: right; }
+    .slide { display: none; min-height: 100svh; padding: clamp(5.5rem, 10vh, 7rem) clamp(1rem, 5vw, 5rem) 6rem; }
+    .slide.active, .slide.leaving { display: flex; flex-direction: column; justify-content: center; }
+    .slide.active { position: relative; z-index: 2; }
+    .slide.leaving { position: fixed; z-index: 1; inset: 0; width: 100%; pointer-events: none; }
+    .slide.active.from-next { animation: slide-in-right .58s cubic-bezier(.22, 1, .36, 1) both; }
+    .slide.active.from-prev { animation: slide-in-left .58s cubic-bezier(.22, 1, .36, 1) both; }
+    .slide.leaving.to-prev { animation: slide-out-left .4s cubic-bezier(.4, 0, 1, 1) both; }
+    .slide.leaving.to-next { animation: slide-out-right .4s cubic-bezier(.4, 0, 1, 1) both; }
+    .inner { width: min(100%, 1260px); margin: auto; }
+    .eyebrow { color: #75dfb4; font-size: .85rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 1rem; }
+    h1, h2, h3 { font-family: "Inter", "Segoe UI", "Noto Sans", sans-serif; font-weight: 750; }
+    h1 { font-size: clamp(2rem, 4vw, 3.7rem); line-height: 1.12; max-width: 1050px; margin: 0 0 1.7rem; letter-spacing: -.035em; }
+    h2 { font-size: clamp(1.45rem, 2.4vw, 2.45rem); line-height: 1.2; margin: 0 0 1.5rem; letter-spacing: -.025em; }
+    .content > h3 { font-size: clamp(1.35rem, 2.2vw, 2.15rem); line-height: 1.22; margin: 0 0 1.4rem; letter-spacing: -.025em; }
+    .slide.active .eyebrow, .slide.active .content > h3, .slide.active .content > ul > li { opacity: 0; animation: content-reveal .55s cubic-bezier(.22, 1, .36, 1) forwards; }
+    .slide.active .eyebrow { animation-delay: .12s; }
+    .slide.active .content > h3 { animation-delay: .2s; }
+    .slide.active .content > ul > li:nth-child(1) { animation-delay: .28s; }
+    .slide.active .content > ul > li:nth-child(2) { animation-delay: .36s; }
+    .slide.active .content > ul > li:nth-child(3) { animation-delay: .44s; }
+    .slide.active .content > ul > li:nth-child(n+4) { animation-delay: .52s; }
+    .lead { font-size: clamp(1rem, 1.4vw, 1.2rem); }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card { background: #102b25; border: 1px solid #4cb88a4a; border-radius: 18px; padding: clamp(1rem, 2vw, 1.6rem); min-width: 0; }
+    .card h3 { color: #8be9c1; margin: 0 0 .7rem; font-size: 1.12rem; }
+    .card p { margin: .35rem 0 .85rem; }
+    .card p:last-child, .card ul:last-child, .card ol:last-child { margin-bottom: 0; }
+    p, li { line-height: 1.55; }
+    ul, ol { padding-left: 1.35rem; margin: .55rem 0; }
+    li + li { margin-top: .45rem; }
+    li ul, li ol { margin-top: .35rem; }
+    strong { color: #f9fffc; }
+    code { color: #acefd0; background: #ffffff12; padding: .08em .3em; border-radius: 4px; overflow-wrap: anywhere; }
+    .callout { border-left: 4px solid #73dbab; padding: .45rem 1.15rem; margin: 1rem 0 0; background: #73dbab12; border-radius: 0 12px 12px 0; }
+    .callout p { margin: .3rem 0; }
+    .score { font-size: 2rem; font-weight: 800; color: #81e5b8; margin: .3rem 0; }
+    .footer { position: fixed; z-index: 3; inset: auto 0 0; display: flex; align-items: center; gap: 1rem; padding: .7rem clamp(1rem, 4vw, 4rem); background: #081815ee; border-top: 1px solid #ffffff21; }
+    .nav { display: flex; gap: .5rem; }
+    .nav button { cursor: pointer; color: #f3fff9; background: #184438; border: 1px solid #5aad8b; border-radius: 8px; padding: .4rem .8rem; transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease; }
+    .nav button:hover:not(:disabled), .nav button:focus-visible { background: #2b6d52; transform: translateY(-2px); box-shadow: 0 8px 20px #00000035; }
+    .nav button:active:not(:disabled) { transform: translateY(0) scale(.97); }
+    .nav button:disabled { opacity: .4; cursor: default; }
+    .progress { flex: 1; height: 4px; border-radius: 4px; background: #244038; overflow: hidden; }
+    .progress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #4fcf99, #9af0c9); box-shadow: 0 0 12px #73dbab88; transition: width .5s cubic-bezier(.22, 1, .36, 1); }
+    .counter { color: #b5cec3; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .fine { color: #b5cec3; font-size: .85rem; }
+    .content > ul > li { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+    .content > ul > li:hover { transform: translateY(-4px); border-color: #73dbab88; box-shadow: 0 16px 34px #0000002e; }
+    @keyframes slide-in-right { from { opacity: 0; transform: translateX(42px) scale(.99); } to { opacity: 1; transform: none; } }
+    @keyframes slide-in-left { from { opacity: 0; transform: translateX(-42px) scale(.99); } to { opacity: 1; transform: none; } }
+    @keyframes slide-out-left { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(-28px) scale(.985); } }
+    @keyframes slide-out-right { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(28px) scale(.985); } }
+    @keyframes content-reveal { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    @media (max-width: 850px) { .grid, .grid.three { grid-template-columns: 1fr; } .slide.active, .slide.leaving { justify-content: flex-start; } .meta { display: none; } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      .content > ul > li:hover { transform: none; }
+    }
+    @media print {
+      :root { color: #13251d; background: #fff; }
+      .deck { background: #fff; }
+      .topbar, .footer { display: none; }
+      .slide, .slide.active { display: flex; min-height: 0; height: 100vh; padding: 1.4cm; break-after: page; page-break-after: always; justify-content: center; }
+      .slide:last-child { break-after: auto; }
+      .card { background: #f1f8f4; border-color: #a6cbb4; }
+      .card h3, .eyebrow, .score, code { color: #146c49; }
+      strong { color: #13251d; }
+      code { background: #edf4ee; }
+      .callout { background: #f1f8f4; }
+      .fine { color: #485b50; }
+      h1 { font-size: 2.5rem; }
+      h2 { font-size: 1.8rem; }
+      p, li { line-height: 1.35; }
+      .grid, .grid.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+.content > ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; padding: 0; list-style: none; }
+.content > ul > li { min-width: 0; padding: clamp(1rem, 2vw, 1.6rem); border: 1px solid #4cb88a4a; border-radius: 18px; background: #102b25; }
+.content > ul > li + li { margin-top: 0; }
+.content > ul > li > ul, .content > ul > li > ol { margin-top: .5rem; }
+@media (max-width: 850px) { .content > ul { grid-template-columns: 1fr; } }
+@media print { .content > ul > li { background: #f1f8f4; border-color: #a6cbb4; } }
+</style>
+</head>
+<body>
+  <main class="deck" aria-label="SLIDE BÁO CÁO GIẢI PHÁP: GREENSM DATA-CENTRIC CHALLENGE">
+    <header class="topbar">
+      <span class="brand">SLIDE BÁO CÁO GIẢI PHÁP: GREENSM DATA-CENTRIC CHALLENGE</span>
+      <span class="meta">
+      </span>
+    </header>
+    <section class="slide active" aria-label="SLIDE 1: TỔNG QUAN CHIẾN LƯỢC &amp; BÀI TOÁN">
+      <div class="inner">
+        <p class="eyebrow">SLIDE 1: TỔNG QUAN CHIẾN LƯỢC &amp; BÀI TOÁN</p>
+        <div class="content">
+          <h3>Tiêu đề: Data-Centric Optimization cho Bài toán Nhận diện GreenSM</h3>
+          <ul>
+            <li>
+              <strong>Bài toán:</strong> Single-class object detection (<code>0: GreenSM</code>). Phát hiện taxi điện Xanh SM trong bối cảnh giao thông Việt Nam đa dạng, phức tạp.
+            </li>
+            <li>
+              <strong>Ràng buộc cuộc thi:</strong>
+              <ul>
+                <li>Kiến trúc cố định: YOLOv8n (<code>yolov8n.pt</code>), kích thước ảnh <code>640x640</code>.
+                </li>
+                <li>Hậu xử lý cố định: Letterbox 640x640, <code>conf=0.001</code>, <code>iou=0.7</code>, <code>max_det=300</code>.
+                </li>
+                <li>Đánh giá: 100 × mAP@[0.5:0.95] trên tập ẩn.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Chiến lược cốt lõi:</strong>
+              <ul>
+                <li>Không can thiệp kiến trúc mô hình -&gt; 100% tài nguyên tập trung vào <strong>Chất lượng dữ liệu (Data Quality)</strong>.
+                </li>
+                <li>Chu trình khép kín: _Thu thập có chủ đích -&gt; Pre-label tự động -&gt; Kiểm duyệt chéo theo guideline chuẩn -&gt; Train baseline -&gt; Error analysis &amp; Active learning._
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide" aria-label="SLIDE 2: BƯỚC 1 - THU THẬP DỮ LIỆU ĐA DẠNG CÓ CHỦ ĐÍCH">
+      <div class="inner">
+        <p class="eyebrow">SLIDE 2: BƯỚC 1 - THU THẬP DỮ LIỆU ĐA DẠNG CÓ CHỦ ĐÍCH</p>
+        <div class="content">
+          <h3>Tiêu đề: Đa dạng hóa môi trường &amp; Chiến lược Khai thác Negative Samples</h3>
+          <ul>
+            <li>
+              <strong>Mục tiêu:</strong> Tránh overfitting miền dữ liệu cục bộ, bao phủ tối đa phân phối thực tế tại Việt Nam.
+            </li>
+            <li>
+              <strong>Quy mô &amp; Nguồn dữ liệu thực tế (Tổng cộng: 233 ảnh chuẩn 640x640):</strong>
+              <ul>
+                <li>
+                  <strong>146 ảnh đường phố tổng hợp (<code>images/</code>):</strong> Khai thác từ video hành trình đường phố Hà Nội (Hanoi Driving Tours, góc nhìn dashcam/người đi đường, mật độ giao thông dày, xe bị che khuất).
+                </li>
+                <li>
+                  <strong>56 ảnh ban đêm &amp; mưa đêm (<code>images_night/</code>):</strong> Cắt frame từ các video &quot;Hanoi Night Drive 4K&quot; &amp; &quot;Rainy Drive Hanoi&quot; để model học đặc trưng xe dưới ánh đèn đường, đèn pha và vệt phản chiếu mặt đường ướt.
+                </li>
+                <li>
+                  <strong>31 ảnh ban ngày chọn lọc (<code>image_day/</code>):</strong> Xe ở các điều kiện ánh sáng tự nhiên rõ nét, góc chụp trực diện và nghiêng 3/4.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Hard Negative Mining (Triệt tiêu False Positive):</strong>
+              <ul>
+                <li>Chủ động đưa vào các ảnh đường phố không có GreenSM, xe có màu cyan/xanh lá dễ gây nhầm lẫn (xe buýt điện VinBus, taxi Mai Linh, xe cá nhân màu xanh).
+                </li>
+                <li>Giữ tỷ lệ background samples ~10-15% để model triệt tiêu cảnh báo nhầm.
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide" aria-label="SLIDE 3: BƯỚC 2 - LABEL GUIDELINE &amp; CHUẨN HÓA QUY ƯỚC">
+      <div class="inner">
+        <p class="eyebrow">SLIDE 3: BƯỚC 2 - LABEL GUIDELINE &amp; CHUẨN HÓA QUY ƯỚC</p>
+        <div class="content">
+          <h3>Tiêu đề: Loại bỏ Nhiễu Nhãn bằng Bộ Quy ước Chặt chẽ (Guideline v1.0)</h3>
+          <ul>
+            <li>
+              <strong>Vấn đề cốt lõi:</strong> Trong Data-Centric, nhiễu nhãn (label noise) và box lỏng lẻo làm sụt giảm nghiêm trọng mAP@[0.5:0.95].
+            </li>
+            <li>
+              <strong>Quy chuẩn Bounding Box:</strong>
+              <ul>
+                <li>
+                  <strong>Tiêu chí gán nhãn:</strong> Chỉ gán khi thấy dấu hiệu dịch vụ thực tế (chữ/logo Xanh SM, đèn mào, decal nhận diện). Tuyệt đối không gán xe VinFast cá nhân cùng form nhưng không phải taxi dịch vụ.
+                </li>
+                <li>
+                  <strong>BBox Tightness:</strong> Box phải ôm sát mép thân xe nhìn thấy thực tế. Không vẽ box theo phần xe bị che khuất trong tưởng tượng.
+                </li>
+                <li>
+                  <strong>Xử lý xe sát mép (Truncation):</strong> Cắt box ngay tại biên ảnh, không ước lượng phần xe nằm ngoài khung hình.
+                </li>
+                <li>
+                  <strong>Kích thước tối thiểu:</strong> Bỏ qua các đối tượng có kích thước nhỏ hơn $15 \times 15$ pixel do không đủ cơ sở trích xuất đặc trưng nhận diện.
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide" aria-label="SLIDE 4: BƯỚC 3 - QUY TRÌNH PRE-LABELING TỰ ĐỘNG">
+      <div class="inner">
+        <p class="eyebrow">SLIDE 4: BƯỚC 3 - QUY TRÌNH PRE-LABELING TỰ ĐỘNG</p>
+        <div class="content">
+          <h3>Tiêu đề: Tăng tốc Gán nhãn bằng Script Tự động hóa qua CVAT API</h3>
+          <ul>
+            <li>
+              <strong>Thách thức:</strong> Thời gian thi đấu giới hạn (~6.5 tiếng), gán tay toàn bộ gây chậm tiến độ và thiếu nhất quán.
+            </li>
+            <li>
+              <strong>Giải pháp tự động hóa (<code>prelabel_job43.py</code>):</strong>
+              <ul>
+                <li>Kết nối trực tiếp vào CVAT Server qua REST API, duyệt qua từng task/job.
+                </li>
+                <li>Dùng mô hình pretrained phát hiện xe 4 bánh (car/truck) để sinh bounding box sơ bộ.
+                </li>
+                <li>Tự động clamp tọa độ vào khung $[0, 640]$, lọc bỏ box $&lt; 15\text{px}$, gán nháp class <code>GreenSM (ID 0)</code>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Hiệu quả:</strong>
+              <ul>
+                <li>Giảm 70% thời gian vẽ tay ban đầu cho annotator.
+                </li>
+                <li>Annotator chuyển từ thao tác &quot;vẽ mới&quot; sang &quot;kiểm tra, chỉnh chặt box và loại bỏ False Positive&quot;.
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide" aria-label="SLIDE 5: BƯỚC 4 - DUYỆT NHÃN, KIỂM TRA CHÉO &amp; LÀM SẠCH">
+      <div class="inner">
+        <p class="eyebrow">SLIDE 5: BƯỚC 4 - DUYỆT NHÃN, KIỂM TRA CHÉO &amp; LÀM SẠCH</p>
+        <div class="content">
+          <h3>Tiêu đề: Quy trình QA/QC 2 Vòng &amp; Chuẩn hóa Dữ liệu</h3>
+          <ul>
+            <li>
+              <strong>Quy trình kiểm tra chéo (Cross-check):</strong>
+              <ul>
+                <li>Không để người gán tự duyệt dữ liệu của mình. Thành viên A gán nhãn -&gt; Thành viên B review và đối chiếu trực tiếp với <code>guideline.md</code>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Phát hiện &amp; Xử lý dị thường tự động:</strong>
+              <ul>
+                <li>Chạy script kiểm tra định dạng YOLO trước khi train:
+                  <ul>
+                    <li>Kiểm tra class ID duy nhất: chỉ chấp nhận ID = 0.</li>
+                    <li>Kiểm tra tọa độ chuẩn hóa: bắt buộc $0 \le cx, cy, w, h \le 1.0$.</li>
+                    <li>Phát hiện box rỗng hoặc box tràn viền.</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Xử lý ảnh trùng lặp:</strong> Lọc bỏ các frame video quá giống nhau để tránh data leakage giữa tập train và val.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide" aria-label="SLIDE 6: BƯỚC 5 &amp; 6 - KẾT QUẢ THỰC NGHIỆM, PHÂN TÍCH ĐỘ LỆCH &amp; CHIẾN LƯỢC NỘP">
+      <div class="inner">
+        <p class="eyebrow">SLIDE 6: BƯỚC 5 &amp; 6 - KẾT QUẢ THỰC NGHIỆM, PHÂN TÍCH ĐỘ LỆCH &amp; CHIẾN LƯỢC NỘP</p>
+        <div class="content">
+          <h3>Tiêu đề: Đánh giá Thực nghiệm (66.34 vs 64.44) &amp; Chiến lược Khóa Bài nộp</h3>
+          <ul>
+            <li>
+              <strong>Tiến trình Thực nghiệm &amp; Kết quả Public Test:</strong>
+              <ul>
+                <li>
+                  <strong>Lần 1 (<code>submission-run1.zip</code>): 66.34 mAP</strong> (Đã chọn)
+                  <ul>
+                    <li>Dữ liệu: Pre-label bằng YOLO26n qua CVAT script + duyệt nhãn vòng đầu.</li>
+                    <li>Đạt mAP cao nhất trên tập Public test (40 ảnh).</li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>Lần 2 (<code>submission.zip</code>): 64.44 mAP</strong> (Đã chọn)<ul>
+                    <li>Dữ liệu: Rà soát và re-label lại toàn bộ tập dữ liệu qua script lọc của LC để siết chặt bounding box và loại bỏ hoàn toàn các xe nghi vấn/nhãn nhiễu.</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Phân tích kỹ thuật: Vì sao điểm Public giảm (-1.90 mAP)?</strong>
+              <ul>
+                <li>
+                  <strong>Độ lệch mẫu do tập Public quá nhỏ:</strong> Tập test public chỉ có <strong>40 ảnh</strong> (tập private 80 ảnh). Trên tập 40 ảnh, chỉ cần lệch 1-2 bounding box ở ngưỡng IoU cao hoặc 1 ca biên bị bỏ qua là điểm số dao động 1.5 - 2.5 mAP.
+                </li>
+                <li>
+                  <strong>Hiện tượng Trade-off giữa Precision và Loose BBox:</strong> Việc siết nhãn chặt và lọc khắt khe giúp giảm triệt để False Positive (tăng Precision), nhưng nếu ground-truth của tập test do người gán có xu hướng vẽ rộng (loose box), model học box quá sát sẽ bị phạt IoU ở các ngưỡng cao.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Chiến lược chốt 2 bài nộp cuối cùng (Risk Mitigation):</strong>
+              <ul>
+                <li>Tận dụng tối đa quy chế: Chọn đúng 2 bài nộp có tính chất bổ trợ cho nhau:
+                  <ol>
+                    <li>
+                      <strong>Bài 66.34:</strong> Tối ưu hóa phân phối cho tập test hiện tại.</li>
+                    <li>
+                      <strong>Bài 64.44:</strong> Tối ưu hóa độ sạch dữ liệu theo chuẩn guideline chặt chẽ, giảm nguy cơ overfit nhãn nhiễu trên tập Private ẩn (80 ảnh).</li>
+                  </ol>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide" aria-label="📸 GỢI Ý ẢNH CHÈN VÀO TỪNG SLIDE (Lấy từ `/home/lechibang/Downloads/anh_resize/`)">
+      <div class="inner">
+        <p class="eyebrow">📸 GỢI Ý ẢNH CHÈN VÀO TỪNG SLIDE (Lấy từ <code>/home/lechibang/Downloads/anh_resize/</code>)</p>
+        <div class="content">
+          <ul>
+            <li>
+              <strong>Slide 2 (Thu thập dữ liệu):</strong>
+              <ul>
+                <li>Ghép 3 ảnh cạnh nhau thể hiện đa dạng bối cảnh:
+                  <ul>
+                    <li>Ban ngày: <code>image_day-.../Screenshot 2026-10-04 at 1.14.24 PM.png</code>
+                    </li>
+                    <li>Mật độ giao thông cao / Nút giao: <code>images-.../Ringway_3,_Mai_Dịch_Junction.png</code>
+                    </li>
+                    <li>Mưa đêm / Đèn đường: <code>images_night-.../Screenshot 2026-10-04 at 13-19-35 Rainy Drive in Hanoi...png</code>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Slide 3 (Label Guideline):</strong>
+              <ul>
+                <li>Chọn 1 ảnh có xe bị che khuất một phần (occlusion) và 1 ảnh xe ở xa để minh họa quy tắc: _chỉ gán phần nhìn thấy, bỏ qua xe &lt; 15px_.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Slide 4 (Pre-labeling CVAT):</strong>
+              <ul>
+                <li>Chụp ảnh màn hình giao diện CVAT hoặc 1 ảnh kết quả detect từ script <code>prelabel_job43.py</code>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Slide 6 (Kết quả thực nghiệm):</strong>
+              <ul>
+                <li>Đặt cạnh nhau 2 ảnh dự đoán của mô hình: 1 ảnh nhận diện chuẩn ban đêm và 1 ảnh phân biệt rõ giữa taxi Xanh SM và xe màu xanh khác.
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer" aria-label="Điều hướng slide">
+    <div class="nav">
+      <button type="button" id="prev" aria-label="Slide trước">← Trước</button>
+      <button type="button" id="next" aria-label="Slide tiếp">Tiếp →</button>
+    </div>
+    <div class="progress" aria-hidden="true">
+      <span id="progress">
+      </span>
+    </div>
+    <span class="counter" id="counter" aria-live="polite">
+    </span>
+  </footer>
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    const counter = document.getElementById('counter');
+    const progress = document.getElementById('progress');
+    let current = 0;
+    function show(index) {
+      if (index < 0 || index >= slides.length) return;
+
+      const outgoing = slides[current];
+      const incoming = slides[index];
+      const movingForward = index >= current;
+
+      slides.forEach(slide => slide.classList.remove('leaving', 'to-prev', 'to-next'));
+
+      if (outgoing !== incoming) {
+        outgoing.classList.remove('active', 'from-next', 'from-prev');
+        outgoing.classList.add('leaving', movingForward ? 'to-prev' : 'to-next');
+        outgoing.setAttribute('aria-hidden', 'true');
+
+        window.setTimeout(() => {
+          outgoing.classList.remove('leaving', 'to-prev', 'to-next');
+        }, 420);
+      }
+
+      current = index;
+      incoming.classList.remove('from-next', 'from-prev');
+      void incoming.offsetWidth;
+      incoming.classList.add('active', movingForward ? 'from-next' : 'from-prev');
+      incoming.removeAttribute('aria-hidden');
+      prev.disabled = current === 0;
+      next.disabled = current === slides.length - 1;
+      counter.textContent = `${current + 1} / ${slides.length}`;
+      progress.style.width = `${(current + 1) / slides.length * 100}%`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    slides.forEach(slide => slide.setAttribute('aria-hidden', 'true'));
+    show(0);
+    prev.addEventListener('click', () => show(current - 1));
+    next.addEventListener('click', () => show(current + 1));
+    document.addEventListener('keydown', event => {
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); show(current + 1); }
+    if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) { event.preventDefault(); show(current - 1); }
+    if (event.key === 'Home') show(0);
+    if (event.key === 'End') show(slides.length - 1);
+    });
+
+  </script>
+</body>
+</html>

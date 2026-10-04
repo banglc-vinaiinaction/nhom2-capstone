@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pre-label Job 43 (Task 27) on CVAT using YOLO26n.
+Pre-label Job 44 (Task 28) on CVAT using YOLO26n.
 Target: 4-wheeled vehicles -> GreenSM label (ID 62)
 """
 
@@ -10,25 +10,21 @@ import sqlite3
 from pathlib import Path
 import requests
 from ultralytics import YOLO
+from PIL import Image
+from io import BytesIO
 
 CVAT_URL = "https://well-reach-fixtures-compression.trycloudflare.com"
-TASK_ID = 27
-JOB_ID = 43
-LABEL_ID = 62  # GreenSM
+TASK_ID = 28
+JOB_ID = 44
+LABEL_ID = 63  # GreenSM
 WEIGHTS_PATH = "/mnt/data/projects/vinai-in-action/yolo26-experiment/yolo26n.pt"
 IMAGES_DIR = Path("/mnt/data/projects/vinai-in-action/nhom2-capstone/resource/images_640640")
 
 def get_session():
-    # Extract cookies from Firefox default profile
-    src = Path("/home/lechibang/.config/mozilla/firefox/gxtd8sci.default-release/cookies.sqlite")
-    dst = Path("/tmp/ff_cookies_prelabel.sqlite")
-    shutil.copy2(src, dst)
-
-    conn = sqlite3.connect(dst)
-    cur = conn.cursor()
-    cur.execute('SELECT name, value FROM moz_cookies WHERE host LIKE "%well-reach-fixtures-compression%"')
-    cookies = dict(cur.fetchall())
-    conn.close()
+    cookies = {
+        "csrftoken": "6PjgqSUNA6U744mqkm8T7l9hfnrSgEbT",
+        "sessionid": "6qda884cvjtyza0sma5tlqrsfrsxuytc"
+    }
 
     session = requests.Session()
     session.cookies.update(cookies)
@@ -81,14 +77,15 @@ def run_prelabel():
 
     print(f"\n--- 4. Chạy suy luận (4-wheeled vehicles, conf=0.25, agnostic_nms=True) ---")
     for frame_idx, frame_info in enumerate(frames):
-        img_name = frame_info["name"]
-        img_path = IMAGES_DIR / img_name
-        if not img_path.exists():
-            print(f"⚠️ Không tìm thấy ảnh: {img_path}")
+        r_frame = session.get(f"{CVAT_URL}/api/jobs/{JOB_ID}/data?type=frame&number={frame_idx}&quality=original")
+        if r_frame.status_code != 200:
+            print(f"⚠️ Không thể tải frame {frame_idx}")
             continue
+            
+        img = Image.open(BytesIO(r_frame.content))
 
         res = model.predict(
-            str(img_path),
+            img,
             conf=0.25,
             classes=classes_to_detect,
             agnostic_nms=True,

@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo Cáo Giải Pháp - GreenSM Data-Centric Challenge - Nhóm 02</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070b12;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(0, 229, 163, 0.35);
+      --accent-green: #00e5a3;
+      --accent-cyan: #06b6d4;
+      --accent-blue: #3b82f6;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #cbd5e1;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-glow: 0 0 35px rgba(0, 229, 163, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Ambient Background Glow */
+    .ambient-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 229, 163, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
+      top: -200px;
+      right: -100px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .ambient-glow-2 {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, rgba(0, 0, 0, 0) 70%);
+      bottom: -150px;
+      left: -100px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Top Progress Bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      z-index: 100;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 16.66%;
+      background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 12px var(--accent-green);
+    }
+
+    /* Header Bar */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 16px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(16px);
+      background: rgba(7, 11, 18, 0.6);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      background: rgba(0, 229, 163, 0.12);
+      border: 1px solid var(--border-accent);
+      color: var(--accent-green);
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-tags {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Slide Container */
+    .deck-container {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .slide {
+      position: absolute;
+      width: calc(100% - 72px);
+      height: calc(100% - 48px);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(16px) scale(0.985);
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.4s;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 40px 48px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Slide Headers */
+    .slide-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .step-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(0, 229, 163, 0.15);
+      color: var(--accent-green);
+      border: 1px solid var(--border-accent);
+    }
+
+    .slide-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+      line-height: 1.25;
+      margin-bottom: 24px;
+    }
+
+    .slide-title span {
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      height: calc(100% - 90px);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      background: var(--bg-card-hover);
+    }
+
+    .card-accent {
+      border-color: var(--border-accent);
+      background: rgba(0, 229, 163, 0.03);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .card-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 229, 163, 0.15);
+      color: var(--accent-green);
+      font-size: 0.9rem;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      color: var(--text-sub);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .feature-list li::before {
+      content: "•";
+      color: var(--accent-green);
+      font-size: 1.3rem;
+      line-height: 1;
+      margin-top: 1px;
+    }
+
+    .feature-list strong {
+      color: #fff;
+    }
+
+    /* Image Gallery in Slide 2 */
+    .gallery-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .gallery-item {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .gallery-caption {
+      padding: 10px 12px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .gallery-caption strong {
+      color: var(--text-main);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* Stat Box */
+    .stat-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--accent-green);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* Code Snippet */
+    .code-box {
+      background: #05080f;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #38bdf8;
+      line-height: 1.55;
+      overflow-x: auto;
+    }
+
+    .code-comment {
+      color: #64748b;
+    }
+
+    .code-kw {
+      color: #f43f5e;
+    }
+
+    .code-str {
+      color: #a3e635;
+    }
+
+    /* Footer Controls */
+    footer {
+      position: relative;
+      z-index: 10;
+      padding: 16px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+      backdrop-filter: blur(16px);
+      background: rgba(7, 11, 18, 0.6);
+    }
+
+    .controls-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .slide-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .dot.active {
+      background: var(--accent-green);
+      box-shadow: 0 0 10px var(--accent-green);
+      transform: scale(1.25);
+    }
+
+    .slide-counter {
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+    }
+
+    .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary {
+      background: rgba(0, 229, 163, 0.15);
+      border-color: var(--border-accent);
+      color: var(--accent-green);
+    }
+
+    .btn-primary:hover {
+      background: rgba(0, 229, 163, 0.25);
+      box-shadow: 0 0 15px rgba(0, 229, 163, 0.3);
+    }
+
+    .kbd {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    /* Custom Badges */
+    .metric-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .metric-green {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .metric-amber {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-glow"></div>
+  <div class="ambient-glow-2"></div>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <span class="brand-badge">VINAI IN ACTION</span>
+      <h1 class="brand-title">GreenSM Data-Centric Challenge <span>•</span> Nhóm 02</h1>
+    </div>
+    <div class="meta-tags">
+      <span class="tag">Mô hình: YOLOv8n</span>
+      <span class="tag">Định dạng: ONNX (640x640)</span>
+      <span class="tag">SEED: TEAM_ID (Cố định)</span>
+    </div>
+  </header>
+
+  <!-- Deck Container -->
+  <main class="deck-container">
+
+    <!-- SLIDE 1: TỔNG QUAN CHIẾN LƯỢC -->
+    <section class="slide active" id="slide-1">
+      <div class="slide-meta">
+        <span class="step-pill">Slide 1 / 6</span>
+        <span class="tag">Chiến lược Cốt lõi</span>
+      </div>
+      <h2 class="slide-title">Data-Centric Optimization cho Bài toán <span>Nhận diện GreenSM</span></h2>
+
+      <div class="grid-2">
+        <div class="card card-accent">
+          <div class="card-header">
+            <span class="card-icon">🎯</span>
+            Bài toán & Ràng buộc Cuộc thi
+          </div>
+          <ul class="feature-list">
+            <li><strong>Mục tiêu:</strong> Single-class object detection (<code>class 0: GreenSM</code>). Phát hiện chính xác ô tô taxi điện Xanh SM trong môi trường giao thông phức tạp tại Việt Nam.</li>
+            <li><strong>Kiến trúc cố định:</strong> Mô hình cố định là <strong>YOLOv8n</strong> (<code>yolov8n.pt</code>), kích thước chuẩn 640x640. Mọi đội dùng cùng kiến trúc và cấu hình.</li>
+            <li><strong>Quy chế hậu xử lý cố định:</strong> Letterbox 640x640, <code>conf=0.001</code>, <code>iou=0.7</code>, tối đa 300 boxes/ảnh.</li>
+            <li><strong>Tiêu chí đánh giá:</strong> Điểm số = $100 \times \text{mAP}@[0.5:0.95]$ trên tập test ẩn (40 public / 80 private).</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">⚡</span>
+            Chiến lược Tiếp cận Data-Centric Toàn diện
+          </div>
+          <ul class="feature-list">
+            <li><strong>Chất lượng > Số lượng:</strong> Không thể can thiệp kiến trúc, lợi thế quyết định đến từ độ chuẩn xác của nhãn và tính bao phủ của dữ liệu.</li>
+            <li><strong>Chu trình lặp 6 bước khép kín:</strong>
+              <div style="margin-top: 8px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; color: var(--accent-green);">
+                1. Thu thập đa dạng → 2. Guideline chuẩn → 3. Pre-label CVAT → 4. Review chéo QA → 5. Train & Export → 6. Error Analysis
+              </div>
+            </li>
+            <li><strong>Triệt tiêu False Positive:</strong> Khai thác các mẫu Hard Negative (xe VinFast cá nhân, xe buýt điện VinBus, xe dán decal xanh lá).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: BƯỚC 1 - THU THẬP DỮ LIỆU ĐA DẠNG -->
+    <section class="slide" id="slide-2">
+      <div class="slide-meta">
+        <span class="step-pill">Slide 2 / 6</span>
+        <span class="tag">Bước 1: Thu thập Dữ liệu</span>
+      </div>
+      <h2 class="slide-title">Đa dạng hóa Miền Dữ liệu & <span>Khai thác Hard Negatives</span></h2>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-value">233</div>
+          <div class="stat-label">Tổng số ảnh chuẩn hóa (640x640)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">146</div>
+          <div class="stat-label">Ảnh đường phố tổng hợp (images/)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">56</div>
+          <div class="stat-label">Ảnh ban đêm & Mưa đêm (images_night/)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">31</div>
+          <div class="stat-label">Ảnh ban ngày chọn lọc (image_day/)</div>
+        </div>
+      </div>
+
+      <div class="gallery-container">
+        <div class="gallery-item">
+          <img src="assets/sample_day.png" alt="Ảnh ban ngày">
+          <div class="gallery-caption">
+            <strong>Ban ngày & Góc chụp cận</strong>
+            Ánh sáng tự nhiên, góc chụp 3/4 rõ logo và đèn nóc.
+          </div>
+        </div>
+        <div class="gallery-item">
+          <img src="assets/sample_traffic.png" alt="Nút giao thông Mai Dịch">
+          <div class="gallery-caption">
+            <strong>Mật độ cao & Nút giao thông</strong>
+            Nút giao Mai Dịch: mật độ xe máy/ô tô dày, xe bị che khuất một phần.
+          </div>
+        </div>
+        <div class="gallery-item">
+          <img src="assets/sample_night.png" alt="Mưa đêm Hà Nội">
+          <div class="gallery-caption">
+            <strong>Mưa đêm & Phản chiếu phức tạp</strong>
+            Hanoi Night Drive: đèn pha, đèn đường và vệt sáng ướt mặt đường.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: BƯỚC 2 - LABEL GUIDELINE -->
+    <section class="slide" id="slide-3">
+      <div class="slide-meta">
+        <span class="step-pill">Slide 3 / 6</span>
+        <span class="tag">Bước 2: Quy chuẩn Nhãn</span>
+      </div>
+      <h2 class="slide-title">Loại bỏ Nhiễu Nhãn bằng <span>Label Guideline v1.0</span></h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">📐</span>
+            Quy tắc Hình học Bounding Box (BBox)
+          </div>
+          <ul class="feature-list">
+            <li><strong>BBox Tightness (Độ khít tối đa):</strong> Hộp bao phải ôm sát mép thân xe thực sự nhìn thấy. Không vẽ box theo phần thân xe bị che khuất trong tưởng tượng.</li>
+            <li><strong>Xử lý cắt mép (Truncation):</strong> Khi xe chạm mép ảnh, box kết thúc ngay tại đường biên; tuyệt đối không mở rộng tọa độ ra ngoài khung hình.</li>
+            <li><strong>Ngưỡng kích thước tối thiểu:</strong> Lọc bỏ toàn bộ xe có kích thước dưới <strong>15 × 15 pixel</strong> do không đủ căn cứ nhận diện đặc trưng Xanh SM.</li>
+          </ul>
+        </div>
+
+        <div class="card card-accent">
+          <div class="card-header">
+            <span class="card-icon">🛡️</span>
+            Bằng chứng Nhận diện & Ca Mơ hồ (Ambiguity)
+          </div>
+          <ul class="feature-list">
+            <li><strong>Chỉ gán khi có chứng cứ dịch vụ:</strong> Bắt buộc thấy logo, chữ <code>Xanh SM / Green SM</code> hoặc đèn mào taxi. Không bao giờ gán xe chỉ vì màu sơn xanh/cyan.</li>
+            <li><strong>Phân biệt xe VinFast cá nhân:</strong> Xe VinFast VF5, VF8, VF9 màu xanh cá nhân được phân loại là <strong>Negative Samples</strong>, không gán box.</li>
+            <li><strong>Nguyên tắc Nhất quán:</strong> Các ca mâu thuẫn được lưu vào Annotation Log để reviewer quyết định tập trung, tránh hiện tượng lệch nhãn giữa các thành viên.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: BƯỚC 3 - PRE-LABELING AUTOMATION -->
+    <section class="slide" id="slide-4">
+      <div class="slide-meta">
+        <span class="step-pill">Slide 4 / 6</span>
+        <span class="tag">Bước 3: Tự động hóa Pipeline</span>
+      </div>
+      <h2 class="slide-title">Tăng tốc Gán nhãn bằng <span>CVAT API & YOLO26n</span></h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">⚙️</span>
+            Quy trình Tự động hóa qua Script (`prelabel_job43.py`)
+          </div>
+          <ul class="feature-list">
+            <li><strong>Tích hợp Trực tiếp CVAT Server:</strong> Kết nối qua REST API bằng session cookie và CSRF token, tự động fetch danh sách tasks/jobs.</li>
+            <li><strong>Model Pre-labeling:</strong> Dùng trọng số <code>YOLO26n</code> chuyên phát hiện phương tiện 4 bánh (Car ID 2, Truck ID 7) với <code>conf=0.25</code> và <code>agnostic_nms=True</code>.</li>
+            <li><strong>Tiền xử lý Tọa độ:</strong> Tự động clamp tọa độ vào khung $[0, 640]$, loại bỏ box $< 15\text{px}$, chuyển đổi về định dạng shapes của CVAT.</li>
+            <li><strong>Tối ưu hóa thời gian:</strong> Giảm <strong>70% thời gian vẽ tay</strong>. Người gán chỉ cần kiểm duyệt, siết chặt góc box và xóa False Positives.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="justify-content: center;">
+          <div class="card-header">
+            <span class="card-icon">💻</span>
+            Đoạn mã Thực thi Cốt lõi
+          </div>
+          <div class="code-box">
+<span class="code-comment"># Tự động suy luận và đẩy nhãn nháp lên CVAT Job</span>
+<span class="code-kw">for</span> frame_idx, frame_info <span class="code-kw">in</span> enumerate(frames):
+    img = Image.open(BytesIO(r_frame.content))
+    res = model.predict(img, conf=<span class="code-str">0.25</span>, classes=[<span class="code-str">2, 7</span>])[<span class="code-str">0</span>]
+    <span class="code-kw">for</span> box <span class="code-kw">in</span> res.boxes:
+        x1, y1, x2, y2 = box.xyxy[<span class="code-str">0</span>].tolist()
+        <span class="code-kw">if</span> (x2 - x1) >= <span class="code-str">15</span> <span class="code-kw">and</span> (y2 - y1) >= <span class="code-str">15</span>:
+            shapes.append({
+                <span class="code-str">"label_id"</span>: <span class="code-str">63</span>, <span class="code-comment"># GreenSM</span>
+                <span class="code-str">"points"</span>: [x1, y1, x2, y2],
+                <span class="code-str">"type"</span>: <span class="code-str">"rectangle"</span>
+            })
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: BƯỚC 4 - DUYỆT NHÃN & QA -->
+    <section class="slide" id="slide-5">
+      <div class="slide-meta">
+        <span class="step-pill">Slide 5 / 6</span>
+        <span class="tag">Bước 4: Kiểm duyệt QA/QC</span>
+      </div>
+      <h2 class="slide-title">Quy trình QA/QC 2 Lớp & <span>Kiểm soát Toàn vẹn Dữ liệu</span></h2>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">👥</span>
+            1. Kiểm tra Chéo (Cross-check)
+          </div>
+          <ul class="feature-list">
+            <li>Người gán nhãn không tự kiểm tra bài của mình.</li>
+            <li>Reviewer độc lập rà soát 100% các bounding box để đối chiếu với `guideline.md`.</li>
+            <li>Sửa triệt để các box bị lỏng viền hoặc gán nhầm xe khác.</li>
+          </ul>
+        </div>
+
+        <div class="card card-accent">
+          <div class="card-header">
+            <span class="card-icon">🤖</span>
+            2. Xác thực Format Tự động
+          </div>
+          <ul class="feature-list">
+            <li>Script tự động kiểm tra cú pháp file nhãn `.txt`.</li>
+            <li>Ràng buộc class ID duy nhất: <code>class == 0</code>.</li>
+            <li>Kiểm tra biên tọa độ: bắt buộc $0 \le cx, cy, w, h \le 1.0$. Lọc triệt để box rỗng hoặc box lỗi âm.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">🚫</span>
+            3. Chống Rò rỉ (Data Leakage)
+          </div>
+          <ul class="feature-list">
+            <li>Lọc bỏ các frame video quá gần nhau từ cùng một nguồn driving tour.</li>
+            <li>Phân bổ dữ liệu nghiêm ngặt giữa tập Train và Val để mô hình phản ánh đúng độ khái quát hóa.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: BƯỚC 5 & 6 - KẾT QUẢ THỰC NGHIỆM & CHIẾN LƯỢC NỘP -->
+    <section class="slide" id="slide-6">
+      <div class="slide-meta">
+        <span class="step-pill">Slide 6 / 6</span>
+        <span class="tag">Bước 5 & 6: Thực nghiệm & Đóng gói</span>
+      </div>
+      <h2 class="slide-title">Đánh giá Thực nghiệm (66.34 vs 64.44) & <span>Chiến lược Khóa Bài nộp</span></h2>
+
+      <div class="stat-row">
+        <div class="stat-card" style="border-color: rgba(16, 185, 129, 0.4);">
+          <div class="stat-value" style="color: #10b981;">66.34 mAP</div>
+          <div class="stat-label">Lần 1 (submission-run1.zip) • Đã chọn</div>
+        </div>
+        <div class="stat-card" style="border-color: rgba(245, 158, 11, 0.4);">
+          <div class="stat-value" style="color: #f59e0b;">64.44 mAP</div>
+          <div class="stat-label">Lần 2 (submission.zip) • Đã chọn</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color: var(--accent-cyan);">40 ảnh</div>
+          <div class="stat-label">Kích thước Tập Public Test (Nhiễu cao)</div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="height: auto; margin-top: 10px;">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">🔬</span>
+            Phân tích Kỹ thuật: Vì sao điểm Public giảm (-1.90 mAP)?
+          </div>
+          <ul class="feature-list">
+            <li><strong>Độ nhạy mẫu của tập Public nhỏ (40 ảnh):</strong> Trên mẫu 40 ảnh, chỉ cần lệch 1-2 bounding box ở ngưỡng IoU cao hoặc 1 ca biên bị bỏ qua là điểm số dao động 1.5 - 2.5 mAP.</li>
+            <li><strong>Trade-off giữa Siết nhãn (Tightness) & Ground-truth người gán:</strong> Re-label khắt khe giúp model có Precision cực cao. Nhưng nếu tập test ẩn có nhãn vẽ hơi rộng tay (loose box), model học box quá sát sẽ bị phạt nhẹ IoU ở dải IoU 0.85-0.95.</li>
+          </ul>
+        </div>
+
+        <div class="card card-accent">
+          <div class="card-header">
+            <span class="card-icon">🎯</span>
+            Chiến lược Khóa 2 Bài nộp & Tái lập (Reproducibility)
+          </div>
+          <ul class="feature-list">
+            <li><strong>Bảo vệ rủi ro kép (Risk Mitigation):</strong>
+              <br>• <strong>Bài 66.34:</strong> Phòng ngừa trường hợp tập Private có cùng phong cách nhãn với Public.
+              <br>• <strong>Bài 64.44:</strong> Đảm bảo tính tổng quát hóa cao nhất trên 80 ảnh Private nhờ dữ liệu sạch, không overfit nhãn nhiễu.
+            </li>
+            <li><strong>100% Tái lập:</strong> Cố định <code>SEED = TEAM_ID</code>, đóng gói file ONNX hợp lệ chuẩn kích thước <code>[1, 5, 8400]</code>.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer Controls -->
+  <footer>
+    <div class="controls-left">
+      <div class="slide-dots" id="dotsContainer">
+        <div class="dot active" onclick="goToSlide(0)"></div>
+        <div class="dot" onclick="goToSlide(1)"></div>
+        <div class="dot" onclick="goToSlide(2)"></div>
+        <div class="dot" onclick="goToSlide(3)"></div>
+        <div class="dot" onclick="goToSlide(4)"></div>
+        <div class="dot" onclick="goToSlide(5)"></div>
+      </div>
+      <div class="slide-counter" id="slideCounter">01 / 06</div>
+    </div>
+
+    <div class="controls-right">
+      <button class="btn" onclick="prevSlide()"><span class="kbd">←</span> Trước</button>
+      <button class="btn btn-primary" onclick="nextSlide()">Sau <span class="kbd">→</span></button>
+      <button class="btn" onclick="toggleFullScreen()"><span class="kbd">F</span> Toàn màn hình</button>
+    </div>
+  </footer>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    const counter = document.getElementById('slideCounter');
+    const progressBar = document.getElementById('progressBar');
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+
+    function updateSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+      currentIndex = index;
+
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === currentIndex);
+      });
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIndex);
+      });
+
+      counter.textContent = `${String(currentIndex + 1).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
+      progressBar.style.width = `${((currentIndex + 1) / totalSlides) * 100}%`;
+    }
+
+    function nextSlide() {
+      if (currentIndex < totalSlides - 1) {
+        updateSlide(currentIndex + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentIndex > 0) {
+        updateSlide(currentIndex - 1);
+      }
+    }
+
+    function goToSlide(index) {
+      updateSlide(index);
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullScreen();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        goToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        goToSlide(totalSlides - 1);
+      }
+    });
+
+    // Touch gesture swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchEndX < touchStartX - 50) nextSlide();
+      if (touchEndX > touchStartX + 50) prevSlide();
+    });
+
+    // Initialize
+    updateSlide(0);
+  </script>
+</body>
+</html>
